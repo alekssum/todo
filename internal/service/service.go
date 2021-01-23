@@ -2,48 +2,60 @@ package service
 
 import (
 	"database/sql"
-	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/alekssum/todo/internal/alogsubscriber"
+
+	"github.com/alekssum/todo/internal/logging"
+
 	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 )
 
 func New(cfg *config) *service {
-	return &service{cfg}
+	return &service{
+		cfg: cfg,
+	}
 }
 
 type service struct {
 	cfg *config
+	l   logging.Logger
 }
 
 func (s *service) Start() error {
+	s.configureLogger()
+
 	//db, err := s.connectDB()
 	//if err != nil {
-	//	return err
+	//	return errors.Wrap(err, "service starting")
 	//}
 	//defer db.Close()
 
-	s.registerRoutes()
+	r := s.registerRoutes()
+	httpAddr := s.cfg.HTTP.Address()
+	log.Println("Listen and serve:", httpAddr)
+	return http.ListenAndServe(httpAddr, r)
+}
 
-	return http.ListenAndServe(s.cfg.Address(), nil)
+func (s *service) configureLogger() {
+	logSubscribers := make([]logging.LogSubscriber, 0)
+	logSubscribers = append(logSubscribers, &alogsubscriber.MQ{})
+	l := logging.New(&s.cfg.Log)
+	l.Subscribe(logSubscribers)
+	s.l = l
 }
 
 func (s *service) connectDB() (*sql.DB, error) {
-	connURL := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		s.cfg.DB.Host,
-		s.cfg.DB.Port,
-		s.cfg.DB.User,
-		s.cfg.DB.Pass,
-		s.cfg.DB.Name,
-	)
-	db, err := sql.Open("postgres", connURL)
+	connURI := s.cfg.DB.ConnectionURI()
+	db, err := sql.Open("postgres", connURI)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "connectDB")
 	}
 
 	if err := db.Ping(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "connectDB")
 	}
 
 	return db, nil

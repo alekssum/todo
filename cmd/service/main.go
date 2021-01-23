@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+
 	cfg := service.NewConfig()
 	if err := cfg.Init(""); err != nil {
 		log.Fatal(err)

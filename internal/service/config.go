@@ -1,32 +1,49 @@
 package service
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/alekssum/todo/internal/logging"
+)
 
 func NewConfig() *config {
 	return &config{
-		HTTP: struct {
-			Host string
-			Port string
-		}{Host: ":", Port: "8090"},
+		HTTP: HTTP{Host: ":", Port: "8090"},
 	}
 }
 
 type config struct {
-	HTTP struct {
-		Host string
-		Port string
-	}
-	DB struct {
-		User string
-		Pass string
-		Host string
-		Port string
-		Name string
-	}
+	HTTP HTTP
+	DB   DB
+	Log  logging.Config
 }
 
-func (c *config) Address() string {
-	return fmt.Sprintf("%s%s", c.HTTP.Host, c.HTTP.Port)
+type HTTP struct {
+	Host string
+	Port string
+}
+
+func (h *HTTP) Address() string {
+	return fmt.Sprintf("%s%s", h.Host, h.Port)
+}
+
+type DB struct {
+	User string
+	Pass string
+	Host string
+	Port string
+	Name string
+}
+
+func (db *DB) ConnectionURI() string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		db.Host,
+		db.Port,
+		db.User,
+		db.Pass,
+		db.Name,
+	)
 }
 
 func (c *config) Init(file string) error {
