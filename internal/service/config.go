@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 
+	"github.com/alekssum/todo/internal/db"
+
 	"github.com/alekssum/todo/internal/logging"
 )
 
@@ -14,7 +16,7 @@ func NewConfig() *config {
 
 type config struct {
 	HTTP HTTP
-	DB   DB
+	DB   *db.Config
 	Log  logging.Config
 }
 
@@ -25,25 +27,6 @@ type HTTP struct {
 
 func (h *HTTP) Address() string {
 	return fmt.Sprintf("%s%s", h.Host, h.Port)
-}
-
-type DB struct {
-	User string
-	Pass string
-	Host string
-	Port string
-	Name string
-}
-
-func (db *DB) ConnectionURI() string {
-	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		db.Host,
-		db.Port,
-		db.User,
-		db.Pass,
-		db.Name,
-	)
 }
 
 func (c *config) Init(file string) error {

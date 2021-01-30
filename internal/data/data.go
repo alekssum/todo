@@ -1,13 +1,15 @@
 package data
 
-import "database/sql"
+import (
+	"github.com/alekssum/todo/internal/db"
+)
 
-func New(db *sql.DB) *data {
+func New(db *db.DB) *data {
 	return &data{db}
 }
 
 type data struct {
-	*sql.DB
+	*db.DB
 }
 
 func Init() error {
