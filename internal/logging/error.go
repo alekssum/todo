@@ -1,5 +1,5 @@
 package logging
 
-func (l *Log) Error(v ...interface{}) {
-
+func (l *Log) Error(err error) {
+	l.ZeroLogger.Err(err).Msg("")
 }

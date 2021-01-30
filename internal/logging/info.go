@@ -1,9 +1,9 @@
 package logging
 
-import "fmt"
+func (l *Log) Info(s string) {
+	if l.LogLevel < infoLevel {
+		return
+	}
 
-func (l *Log) Info(v ...interface{}) {
-	l.ZeroLogger.Info().Msg(fmt.Sprint(v))
-	l.Pipe <- fmt.Sprint(v)
-	l.Pipe <- fmt.Sprint(v)
+	l.ZeroLogger.Info().Msg(s)
 }

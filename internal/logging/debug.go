@@ -1,5 +1,8 @@
 package logging
 
-func (l *Log) Log(v ...interface{}) {
-
+func (l *Log) Debug(s string) {
+	if l.LogLevel < debugLevel {
+		return
+	}
+	l.ZeroLogger.Debug().Msg(s)
 }

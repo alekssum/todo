@@ -5,38 +5,47 @@ import (
 	zlog "github.com/rs/zerolog/log"
 )
 
-type Logger interface {
-	Log(v ...interface{})
-	Info(v ...interface{})
-	Error(v ...interface{})
-	Warn(v ...interface{})
-}
+const (
+	errorLevel = 1
+	warnLevel  = 2
+	infoLevel  = 3
+	debugLevel = 4
 
-type LogSubscriber interface {
-	Send(v ...interface{})
+	ErrorLevelName = "error"
+	WarnLevelName  = "warn"
+	InfoLevelName  = "info"
+	DebugLevelName = "debug"
+)
+
+type Logger interface {
+	Info(s string)
+	Error(err error)
+	Warn(s string)
+	Debug(s string)
 }
 
 func New(cfg *Config) *Log {
 	l := zlog.Logger.With().Caller().Logger()
 	return &Log{
 		ZeroLogger: &l,
-		Pipe:       make(chan interface{}),
+		LogLevel:   levelNumber(cfg.LogLevel),
 	}
 }
 
 type Log struct {
 	ZeroLogger *zerolog.Logger
-	Pipe       chan interface{}
+	LogLevel   int
 }
 
-func (l *Log) Subscribe(sl []LogSubscriber) {
-
-	go func() {
-		for v := range l.Pipe {
-			for i := range sl {
-				sl[i].Send(v)
-			}
-		}
-	}()
-
+func levelNumber(lvl string) int {
+	switch lvl {
+	case ErrorLevelName:
+		return errorLevel
+	case WarnLevelName:
+		return warnLevel
+	case DebugLevelName:
+		return debugLevel
+	default:
+		return infoLevel
+	}
 }

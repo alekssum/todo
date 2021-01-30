@@ -11,13 +11,16 @@ import (
 func NewConfig() *config {
 	return &config{
 		HTTP: HTTP{Host: ":", Port: "8090"},
+		Log: &logging.Config{
+			logging.DebugLevelName,
+		},
 	}
 }
 
 type config struct {
 	HTTP HTTP
 	DB   *db.Config
-	Log  logging.Config
+	Log  *logging.Config
 }
 
 type HTTP struct {

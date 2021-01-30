@@ -36,6 +36,7 @@ func (s *service) Start() error {
 }
 
 func (s *service) configureLogger() {
-	l := logging.New(&s.cfg.Log)
+	l := logging.New(s.cfg.Log)
 	s.l = l
+	log.Println("Log level:", s.cfg.Log.LogLevel)
 }
