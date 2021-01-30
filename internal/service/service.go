@@ -4,7 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alekssum/todo/internal/db"
 	"github.com/alekssum/todo/internal/logging"
+	"github.com/pkg/errors"
 
 	_ "github.com/lib/pq"
 )
@@ -23,11 +25,11 @@ type service struct {
 func (s *service) Start() error {
 	s.configureLogger()
 
-	//db, err := db.New(s.cfg.DB)
-	//if err != nil {
-	//	return errors.Wrap(err, "service starting")
-	//}
-	//defer db.Close()
+	db, err := db.New(s.cfg.DB)
+	if err != nil {
+		return errors.Wrap(err, "service starting")
+	}
+	defer db.Close()
 
 	r := s.registerRoutes()
 	httpAddr := s.cfg.HTTP.Address()
